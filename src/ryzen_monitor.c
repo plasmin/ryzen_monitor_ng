@@ -63,7 +63,7 @@ system_info sysinfo;
 
 
 static int update_time_s = 1;
-static int export_update_time_s = 10;
+static int export_update_time_s = 1;
 int show_disabled_cores = 0;
 static int cmd_mode = 0;
 int debuglog = 1;
@@ -807,9 +807,9 @@ void draw_export(pm_table *pmt, system_info *sysinfo) {
 
         for (i=0; i<pmt->max_l3; i+=2) {
             // first value
-            j = snprintf(strbuf, sizeof(strbuf), "package_l3logic%spower=%.3f,", i, pmta0(L3_LOGIC_POWER[i]));
+            j = snprintf(strbuf, sizeof(strbuf), "package_l3logic%dpower=%.3f,", i, pmta0(L3_LOGIC_POWER[i]));
             // second value if it exists
-            if (pmt->max_l3-i > 1) j += snprintf(strbuf+j, sizeof(strbuf)-j, "package_l3logic%spower=%.3f,", i+1, pmta0(L3_LOGIC_POWER[i+1]));
+            if (pmt->max_l3-i > 1) j += snprintf(strbuf+j, sizeof(strbuf)-j, "package_l3logic%dpower=%.3f,", i+1, pmta0(L3_LOGIC_POWER[i+1]));
             // end of string (sum or nothing)
             if (pmt->max_l3-i <= 3)
                 j += snprintf(strbuf+j, sizeof(strbuf)-j, "package_l3logicpower=%.3f,", l3_logic_power);
@@ -819,9 +819,9 @@ void draw_export(pm_table *pmt, system_info *sysinfo) {
         }
         for (i=0; i<pmt->max_l3; i+=2) {
             // + sign if needed and first value
-            j = snprintf(strbuf, sizeof(strbuf), "package_l3vddm%spower=%.3f,", i, pmta0(L3_VDDM_POWER[i]));
+            j = snprintf(strbuf, sizeof(strbuf), "package_l3vddm%dpower=%.3f,", i, pmta0(L3_VDDM_POWER[i]));
             // second value if it exists
-            if (pmt->max_l3-i > 1) j += snprintf(strbuf, sizeof(strbuf)-j, "package_l3vddm%spower=%.3f,", i+1, pmta0(L3_VDDM_POWER[i+1]));
+            if (pmt->max_l3-i > 1) j += snprintf(strbuf, sizeof(strbuf)-j, "package_l3vddm%dpower=%.3f,", i+1, pmta0(L3_VDDM_POWER[i+1]));
             // end of string (sum or nothing)
             if (pmt->max_l3-i <= 3)
                 j += snprintf(strbuf+j, sizeof(strbuf)-j, "package_l3vddmpower=%.3f,", l3_vddm_power);
