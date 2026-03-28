@@ -32,9 +32,9 @@
 extern smu_obj_t obj;
 extern int debuglog;
 
-#define SEND_CMD_RSMU(op) { if (smu_send_command(&obj, op, &args, TYPE_RSMU) != SMU_Return_OK) goto _SEND_ERROR; }
-#define SEND_CMD_MP1(op) { if (smu_send_command(&obj, op, &args, TYPE_MP1) != SMU_Return_OK) goto _SEND_ERROR; }
-#define SEND_CMD_HSMP(op) { if (smu_send_command(&obj, op, &args, TYPE_HSMP) != SMU_Return_OK) goto _SEND_ERROR; }
+#define SEND_CMD_RSMU(op) { if (smu_send_command(&obj, op, &args, SMU_TYPE_RSMU) != SMU_Return_OK) goto _SEND_ERROR; }
+#define SEND_CMD_MP1(op) { if (smu_send_command(&obj, op, &args, SMU_TYPE_MP1) != SMU_Return_OK) goto _SEND_ERROR; }
+#define SEND_CMD_HSMP(op) { if (smu_send_command(&obj, op, &args, SMU_TYPE_HSMP) != SMU_Return_OK) goto _SEND_ERROR; }
 
 #define pmta(elem) ((pmt->elem)?(*pmt->elem):NAN)
 //Same, but with 0 as return. For summations that should not fail if one value is not present.
@@ -60,7 +60,7 @@ int send_tri_command(unsigned int op_rsmu, unsigned int op_mp1, unsigned int op_
     smu_return_val ret_smu;
 
     if (op_rsmu != 0x0) {
-        ret_smu = smu_send_command(&obj, op_rsmu, args, TYPE_RSMU);
+        ret_smu = smu_send_command(&obj, op_rsmu, args, SMU_TYPE_RSMU);
         if ( ret_smu != SMU_Return_OK) {
             if (debuglog)
                 fprintf(stderr, "\nSMU Error, RSMU cmd:0x%X MSG=%s\n", op_rsmu, smu_return_to_str(ret_smu));
@@ -71,7 +71,7 @@ int send_tri_command(unsigned int op_rsmu, unsigned int op_mp1, unsigned int op_
     }
 
     if (op_mp1 != 0x0) {
-        ret_smu = smu_send_command(&obj, op_mp1, args, TYPE_MP1);
+        ret_smu = smu_send_command(&obj, op_mp1, args, SMU_TYPE_MP1);
         if ( ret_smu != SMU_Return_OK) {
             if (debuglog)
                 fprintf(stderr, "\nSMU Error, MP1 cmd:0x%X MSG=%s\n", op_mp1, smu_return_to_str(ret_smu));
@@ -82,7 +82,7 @@ int send_tri_command(unsigned int op_rsmu, unsigned int op_mp1, unsigned int op_
     }
 
     if (op_hsmp != 0x0) {
-        ret_smu = smu_send_command(&obj, op_hsmp, args, TYPE_HSMP);
+        ret_smu = smu_send_command(&obj, op_hsmp, args, SMU_TYPE_HSMP);
         if ( ret_smu != SMU_Return_OK) {
             if (debuglog)
                 fprintf(stderr, "\nSMU Error, HSMP cmd:0x%X MSG=%s\n", op_hsmp, smu_return_to_str(ret_smu));

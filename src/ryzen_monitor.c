@@ -51,7 +51,7 @@
 #include "commonfuncs.h"
 #include "argparse.h"
 
-#define PROGRAM_VERSION "2.0.5"
+#define PROGRAM_VERSION "2.2.0"
 #define BUF_SIZE 65536
 #define getName(var) #var
 
@@ -109,12 +109,12 @@ void draw_screen(pm_table *pmt, system_info *sysinfo) {
         print_line("Processor Code Name", sysinfo->codename);
         print_line("Cores", "%d", sysinfo->cores);
         print_line("Core CCDs", "%d", sysinfo->ccds);
-        if (pmt->zen_version!=3) {
+        if (pmt->zen_version < 3) {
             print_line("Core CCXs", "%d", sysinfo->ccxs);
             print_line("Cores Per CCX", "%d", sysinfo->cores_per_ccx);
         }
         else
-            print_line("Cores Per CCD", "%d", sysinfo->cores_per_ccx); //Zen3 does not have CCXs anymore
+            print_line("Cores Per CCD", "%d", sysinfo->cores_per_ccx); //Zen3+ does not have CCXs anymore
         print_line("SMU FW Version", "v%s", sysinfo->smu_fw_ver);
         print_line("MP1 IF Version", "v%d", sysinfo->if_ver);
         fprintf(stdout, "╰───────────────────────────────────────────────┴────────────────────────────────────────────────╯\n");
@@ -220,7 +220,7 @@ void draw_screen(pm_table *pmt, system_info *sysinfo) {
     if(pmt->PC6) print_line("Package CC6", "%6.2f %%", pmta(PC6));
     fprintf(stdout, "╰───────────────────────────────────────────────┴────────────────────────────────────────────────╯\n");
 
-    if (pmt->zen_version == 3 && view_counts && !view_compact) {
+    if (pmt->zen_version >= 3 && view_counts && !view_compact) {
         fprintf(stdout, "╭── Curve Optimizer Counts ──────────────────────────────────────────────────────────────────────╮\n");
         int padding, padcount, core_count = 0;
         int count = 0;
@@ -266,7 +266,7 @@ void draw_screen(pm_table *pmt, system_info *sysinfo) {
         print_line("TDC Value", "%7.3f A | %7.f A | %8.2f %%", pmta(TDC_VALUE), pmta(TDC_LIMIT), (pmta(TDC_VALUE) / pmta(TDC_LIMIT) * 100));
         if(pmt->TDC_ACTUAL) print_line("TDC Actual", "%7.3f A | %7.f A | %8.2f %%", pmta(TDC_ACTUAL), pmta(TDC_LIMIT), (pmta(TDC_ACTUAL) / pmta(TDC_LIMIT) * 100));
         if(pmt->TDC_VALUE_SOC) print_line("TDC Value, SoC only", "%7.3f A | %7.f A | %8.2f %%", pmta(TDC_VALUE_SOC), pmta(TDC_LIMIT_SOC), (pmta(TDC_VALUE_SOC) / pmta(TDC_LIMIT_SOC) * 100));
-        print_line("EDC", "%7.3f A | %7.f A | %8.2f %%", edc_value, pmta0(EDC_LIMIT), (edc_value / pmta0(EDC_LIMIT) * 100));
+        print_line("EDC", "%7.3f A | %7.f A | %8.2f %%", edc_value, pmta(EDC_LIMIT), (edc_value / pmta(EDC_LIMIT) * 100));
         if(pmt->EDC_VALUE_SOC) print_line("EDC, SoC only", "%7.3f A | %7.f A | %8.2f %%", pmta(EDC_VALUE_SOC), pmta(EDC_LIMIT_SOC), (pmta(EDC_VALUE_SOC) / pmta(EDC_LIMIT_SOC) * 100));
         if (pmt->THM_VALUE) thm_value = pmta(THM_VALUE);
         print_line("THM", "%7.2f C | %7.f C | %8.2f %%", thm_value, pmta(THM_LIMIT), (thm_value / pmta(THM_LIMIT) * 100));
@@ -275,7 +275,8 @@ void draw_screen(pm_table *pmt, system_info *sysinfo) {
             if(pmt->THM_VALUE_GFX) print_line("THM GFX", "%7.2f C | %7.f C | %8.2f %%", pmta(THM_VALUE_GFX), pmta(THM_LIMIT_GFX), (pmta(THM_VALUE_GFX) / pmta(THM_LIMIT_GFX) * 100));
             //if(pmt->STT_LIMIT_APU) print_line("STT APU", "%7.2f   | %7.f   | %8.2f %%", pmta(STT_VALUE_APU), pmta(STT_LIMIT_APU), (pmta(STT_VALUE_APU) / pmta(STT_LIMIT_APU) * 100)); //Always zero
             //if(pmt->STT_LIMIT_DGPU) print_line("STT DGPU", "%7.2f   | %7.f   | %8.2f %%", pmta(STT_VALUE_DGPU), pmta(STT_LIMIT_DGPU), (pmta(STT_VALUE_DGPU) / pmta(STT_LIMIT_DGPU) * 100)); //Always zero
-            print_line("FIT", "%7.f   | %7.f   | %8.2f %%", pmta(FIT_VALUE), pmta(FIT_LIMIT), (pmta(FIT_VALUE) / pmta(FIT_LIMIT)) * 100.f);
+            if(pmt->FIT_VALUE && pmt->FIT_LIMIT)
+                print_line("FIT", "%7.f   | %7.f   | %8.2f %%", pmta(FIT_VALUE), pmta(FIT_LIMIT), (pmta(FIT_VALUE) / pmta(FIT_LIMIT)) * 100.f);
         }
         fprintf(stdout, "╰───────────────────────────────────────────────┴────────────────────────────────────────────────╯\n");
     }
@@ -343,7 +344,7 @@ void draw_screen(pm_table *pmt, system_info *sysinfo) {
                     print_line("L3 Logic Power", "%7.3f W", pmta(L3_LOGIC_POWER[0]));
                 if(pmt->L3_VDDM_POWER[0])
                     print_line("L3 VDDM Power", "%7.3f W", pmta(L3_VDDM_POWER[0]));
-            } else {
+            } else if (pmt->L3_LOGIC_POWER[0] && pmt->L3_VDDM_POWER[0]) {
                 for (i=0; i<pmt->max_l3; i+=2) {
                     // + sign if needed and first value
                     j = snprintf(strbuf, sizeof(strbuf), "%s%7.3f W", (i?"+ ":""), pmta(L3_LOGIC_POWER[i]));
@@ -394,8 +395,10 @@ void draw_screen(pm_table *pmt, system_info *sysinfo) {
             //print_line("ROC_POWER", "%7.4f",pmta(ROC_POWER));
             if (pmt->SOC_TELEMETRY_VOLTAGE || pmt->SOC_TELEMETRY_CURRENT || pmt->SOC_TELEMETRY_POWER)
                 print_line("SoC Power (SVI2)", "%8.3f V | %7.3f A | %8.3f W", pmta0(SOC_TELEMETRY_VOLTAGE), pmta0(SOC_TELEMETRY_CURRENT), pmta0(SOC_TELEMETRY_POWER));
-            if (pmt->CPU_TELEMETRY_VOLTAGE || pmt->CPU_TELEMETRY_CURRENT || pmt->CPU_TELEMETRY_POWER || pmt->VDDCR_CPU_POWER)
-                print_line("Core Power (SVI2)", "%8.3f V | %7.3f A | %8.3f W", pmta0(CPU_TELEMETRY_VOLTAGE), pmta0(CPU_TELEMETRY_CURRENT), pmta0(CPU_TELEMETRY_POWER));
+            if (pmt->CPU_TELEMETRY_VOLTAGE || pmt->CPU_TELEMETRY_CURRENT || pmt->CPU_TELEMETRY_POWER || pmt->VDDCR_CPU_POWER) {
+                float cpu_svi2_power = pmt->CPU_TELEMETRY_POWER ? pmta(CPU_TELEMETRY_POWER) : pmta0(CPU_TELEMETRY_VOLTAGE) * pmta0(CPU_TELEMETRY_CURRENT);
+                print_line("Core Power (SVI2)", "%8.3f V | %7.3f A | %8.3f W", pmta0(CPU_TELEMETRY_VOLTAGE), pmta0(CPU_TELEMETRY_CURRENT), cpu_svi2_power);
+            }
             if (pmt->VDDCR_CPU_POWER)
                 print_line("Core Power (SMU)", "%7.3f W", pmta0(VDDCR_CPU_POWER));
         }
@@ -540,7 +543,7 @@ void draw_export(pm_table *pmt, system_info *sysinfo) {
     fprintf(stdout,
             "\n");
 
-    if (pmt->zen_version == 3) {
+    if (pmt->zen_version >= 3) {
         int padding, padcount, core_count = 0;
         int count = 0;
 
@@ -978,6 +981,7 @@ int init_pmt(pm_table* pmt, unsigned int force) {
     //Prevent illegal memory access
     if (obj.pm_table_size < pmt->min_size) {
         fprintf(stderr, "Selected PM Table is larger than the PM Table returned by the SMU.\n");
+        fprintf(stderr, "PM Table needs %u bytes but SMU reports %u bytes.\n", pmt->min_size, obj.pm_table_size);
         return -103;
     }
 
@@ -1171,7 +1175,7 @@ void read_from_dumpfile(char *dumpfile, unsigned int version, unsigned int test_
     sysinfo.cores = pmt.max_cores;
     sysinfo.physical_cores = pmt.max_cores;
     sysinfo.ccds = pmt.max_cores > 8 ? 2 : 1;
-    sysinfo.ccxs = pmt.zen_version == 3 ? sysinfo.ccds : sysinfo.ccds * 2;
+    sysinfo.ccxs = pmt.zen_version >= 3 ? sysinfo.ccds : sysinfo.ccds * 2;
 
     disabled_cores_from_pmt(&pmt, &sysinfo);
 

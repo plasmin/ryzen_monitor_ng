@@ -11,7 +11,7 @@ This tool is based on the [ryzen_monitor](https://github.com/hattedsquirrel/ryze
 
 Check here the [CHANGELOG](CHANGELOG.md).
 
-**ryzen_monitor** features support for multiple PM table versions (i.e. multiple bios versions), adds support for Ryzen 5000, and presents more fields to user. It is especially focused around providing a more realistic image of the actual power draw and hence true thermal output of the CPU package.
+**ryzen_monitor** features support for multiple PM table versions (i.e. multiple BIOS versions), adds support for Ryzen 5000 and 7000 series, and presents more fields to the user. It is especially focused around providing a more realistic image of the actual power draw and hence true thermal output of the CPU package.
 
 ## Usage
 While in monitor mode you can interact with the following keys:
@@ -22,7 +22,7 @@ c - toggle compact mode
 
 i - toggle information pane
 
-c - toggle co counts pane
+o - toggle CO counts pane
 
 e - toggle electrical pane
 
@@ -38,22 +38,30 @@ Many Set and Get commands are not dependent on a supported PM table.
 If your codename is supported but the PM table not required, that operation will work anyway.
 
 ## Supported CPUs
-* Ryzen 5000 series
+* Ryzen 7000 series (Zen4, experimental)
+  * Ryzen 9 7950X / 7950X3D
+  * Ryzen 9 7900X / 7900X3D / 7900
+  * Ryzen 7 7800X3D / 7700X / 7700
+  * Ryzen 5 7600X3D / 7600X / 7600
+  * Ryzen 5 7500F / 7400F
+  * PRO 7945 / 7745 / 7645
+* Ryzen 5000 series (Zen3)
   * Ryzen 9 5950X
   * Ryzen 9 5900X
   * Ryzen 7 5800X
-  * Ryzen 5 5600X 
+  * Ryzen 5 5600X
   * Ryzen 7 5700G
   * Ryzen 5 5600G
-* Ryzen 3000 series
-  * Ryzen 7 3700X
+* Ryzen 3000 series (Zen2)
+  * Ryzen 5 3600 / 3600X
+  * Ryzen 7 3700X / 3800X / 3800XT
   * Ryzen 9 3900X
   * Ryzen 9 3950X
 * Ryzen Picasso
   * Ryzen 7 3750H
-* Ryzen Lucienne 
+* Ryzen Lucienne / Renoir
   * Ryzen 7 PRO 4750U
-* Other non-Threadripper models will probably work, but are untested
+* Other non-Threadripper desktop models will probably work, but are untested
 
 Note: Support also depends on the PM table version that ships with your BIOS and whether ryzen_smu/ryzen_monitor already knows how to read it.
 
@@ -62,7 +70,7 @@ Note: Support also depends on the PM table version that ships with your BIOS and
 * tune CO counts; test and seek for lowest CO count
 * test for system/cores stability
 * test for optimal PBO limits
-* add more SMU comnmands
+* add more SMU commands
 * add more PM tables
 
 ## Bugs, features and missing platforms
@@ -73,7 +81,7 @@ If your CPU is not supported use the script /scripts/dump_pm_table2.py.
 
 Note: You need pigz to run dump_pm_table2.py
 
-Attach the PM table dumps to the issue. 
+Attach the PM table dumps to the issue.
 
 If you have an APU please also make a run while stressing the GPU. I have included clgpustress in the scripts folder. You need a working setup of OpenCL to use it. Run it in another session with "./gpustress-cli -A" and re-launch the dump script after renaming or archiving the folder with the dumps without GPU load.
 
@@ -81,8 +89,9 @@ If you have an APU please also make a run while stressing the GPU. I have includ
 ![ryzen monitor](https://user-images.githubusercontent.com/20623405/187942949-34b327d0-642f-4a4e-8fff-dfc5d4abbbee.png)
 
 ## Building
-First install the kernel module from [mann1x:ryzen_smu](https://gitlab.com/mann1x/ryzen_smu) (not merged with the official one yet).
-A good indication of whether the above module works for you is by checking whether `/sys/kernel/ryzen_smu_drv/pm_table` is available.
+First install the kernel module. For Zen4 (Ryzen 7000) support, use [amkillam/ryzen_smu](https://github.com/amkillam/ryzen_smu) (v0.1.7). For Zen2/Zen3, the original [mann1x/ryzen_smu](https://gitlab.com/mann1x/ryzen_smu) works as well.
+
+A good indication of whether the module works for you is by checking whether `/sys/kernel/ryzen_smu_drv/pm_table` is available.
 
 Then pull and make **ryzen_monitor**:
 ```bash

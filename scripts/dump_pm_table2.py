@@ -58,30 +58,41 @@ def read_file_str(file, expectedLen = 9):
 
 def getCodeName():
     codenames = [
-        "Unspecified",
-        "Colfax",
-        "Renoir",
-        "Picasso",
-        "Matisse",
-        "Threadripper",
-        "Castle Peak",
-        "Raven Ridge",
-        "Raven Ridge 2",
-        "Summit Ridge",
-        "Pinnacle Ridge",
-        "Rembrandt",
-        "Vermeer",
-        "Vangogh",
-        "Cezanne",
-        "Milan",
-        "Dali",
-        "Lucienne",
-        "Naples"
+        "Unspecified",      # CODENAME_UNDEFINED
+        "Colfax",           # CODENAME_COLFAX
+        "Renoir",           # CODENAME_RENOIR
+        "Picasso",          # CODENAME_PICASSO
+        "Matisse",          # CODENAME_MATISSE
+        "Threadripper",     # CODENAME_THREADRIPPER
+        "Castle Peak",      # CODENAME_CASTLEPEAK
+        "Raven Ridge",      # CODENAME_RAVENRIDGE
+        "Raven Ridge 2",    # CODENAME_RAVENRIDGE2
+        "Summit Ridge",     # CODENAME_SUMMITRIDGE
+        "Pinnacle Ridge",   # CODENAME_PINNACLERIDGE
+        "Rembrandt",        # CODENAME_REMBRANDT
+        "Vermeer",          # CODENAME_VERMEER
+        "Vangogh",          # CODENAME_VANGOGH
+        "Cezanne",          # CODENAME_CEZANNE
+        "Milan",            # CODENAME_MILAN
+        "Dali",             # CODENAME_DALI
+        "Lucienne",         # CODENAME_LUCIENNE
+        "Naples",           # CODENAME_NAPLES
+        "Chagall",          # CODENAME_CHAGALL
+        "Raphael",          # CODENAME_RAPHAEL
+        "Phoenix",          # CODENAME_PHOENIX
+        "Strix Point",      # CODENAME_STRIXPOINT
+        "Granite Ridge",    # CODENAME_GRANITERIDGE
+        "Hawk Point",       # CODENAME_HAWKPOINT
+        "Storm Peak",       # CODENAME_STORMPEAK
+        "Strix Halo",       # CODENAME_STRIXHALO
     ]
-    args = read_file_str(CN_PATH, 2)
+    args = read_file_str(CN_PATH, 3).strip()
 
     if args != False and int(args) != 0:
-        return codenames[int(args)]
+        idx = int(args)
+        if idx < len(codenames):
+            return codenames[idx]
+        return "Unknown({0})".format(idx)
 
     return False
 
@@ -185,7 +196,7 @@ def main():
         dump("1tload", codename, version, i)
         i = i + 1
 
-    subprocess.run("killall -9 {0}".format(tester), shell=True)
+    subprocess.run("pkill -9 -x {0}".format(tester), shell=True)
 
     sleep(DELAY_START)
 
@@ -198,7 +209,7 @@ def main():
         dump("2tload", codename, version, i)
         i = i + 1
 
-    subprocess.run("killall -9 {0}".format(tester), shell=True)
+    subprocess.run("pkill -9 -x {0}".format(tester), shell=True)
 
     sleep(DELAY_START)
 
@@ -211,7 +222,7 @@ def main():
         dump("load", codename, version, i)
         i = i + 1
     
-    subprocess.run("killall -9 {0}".format(tester), shell=True)
+    subprocess.run("pkill -9 -x {0}".format(tester), shell=True)
     print("Done!")
 
 main()
